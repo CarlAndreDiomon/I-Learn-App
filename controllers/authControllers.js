@@ -1,5 +1,6 @@
 import { Student, Teacher } from "../Model/usersSchema.js";
 import bcrypt from "bcrypt";
+import { generateToken } from "../utils/generateToken.js";
 
 // Function to register a student
 export const registerStudent = async (req, res) => {
@@ -63,8 +64,14 @@ export const loginStudent = async(req, res) => {
         if(!isPasswordCorrect){
             return res.status(400).json({message: "Wrong credentials"})
         }
-
-        res.status(200).json({message: "Login successfully",
+        // Send the response with the token and user information
+        const token = generateToken(student._id);
+        // Set the token in the response header
+        res.setHeader("Authorization", `Bearer ${token}`);
+        // Send the response with the token and user information
+        res.status(200).json({
+            message: "Login successfully",
+            token,
             _id: student._id,
             username: student.fullName,
             email: student.email
@@ -120,11 +127,19 @@ export const loginTeacher = async(req, res) => {
             return res.status(400).json({message: "Wrong credentials"});
         }
 
-        res.status(200).json({message: "Login successfully",
+        
+        // Send the response with the token and user information
+        const token = generateToken(teacher._id);
+        // Set the token in the response header
+        res.setHeader("Authorization", `Bearer ${token}`);
+        // Send the response with the token and user information
+        res.json({
+            message: "Login successfully",
+            token,
             _id: teacher._id,
             fullName: teacher.fullName,
             email: teacher.email
-        });
+        })
     } catch (error) {
         console.error("Error in teacherController login", error)
         return res.status(400).send({message: "Internal server error"});
