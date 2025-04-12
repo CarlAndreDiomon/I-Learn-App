@@ -1,4 +1,4 @@
-import { Student, Teacher } from "../Model/usersSchema";
+import { Student, Teacher } from "../Model/usersSchema.js";
 import bcrypt from "bcrypt";
 
 // Function to register a student
@@ -9,7 +9,7 @@ export const registerStudent = async (req, res) => {
 
         
         if(
-            !username ||
+            !fullName ||
             !email ||
             !password 
         ){
@@ -31,9 +31,10 @@ export const registerStudent = async (req, res) => {
 
         await newStudent.save();
         return res.status(201).send({message: "Student created successfully",
-            username: Student.username,
-            email: Student.email,
-            password: Student.password,
+            _id: newStudent._id,
+            fullName: newStudent.fullName,
+            email: newStudent.email,
+            password: newStudent.password,
         })
     } catch (error) {
         res.status(500).json({ message: "Error registering student", error });
@@ -43,17 +44,17 @@ export const registerStudent = async (req, res) => {
 
 // Function to login a student
 export const loginStudent = async(req, res) => {
-    const {username, password} = req.body;
+    const {fullName, password} = req.body;
 
     try {
         if(
-            !username ||
+            !fullName ||
             !password
         ){
             return res.status(400).send({message: "Please enter all fields"})
         }
 
-        const student = await Student.findOne({username})
+        const student = await Student.findOne({fullName})
         if(!student){
             return res.status(400).send({message: 'User not exists'})
         }
@@ -65,7 +66,7 @@ export const loginStudent = async(req, res) => {
 
         res.status(200).json({message: "Login successfully",
             _id: student._id,
-            username: student.username,
+            username: student.fullName,
             email: student.email
         });
     } catch (error) {
@@ -88,10 +89,10 @@ export const registerTeacher = async (req, res) => {
 
         await newTeacher.save();
 
-        return res.status(201).send({message: "Student created successfully",
-            username: Teacher.username,
-            email: Teacher.email,
-            password: Teacher.password,
+        return res.status(201).send({message: "Teacher created successfully",
+            fullName: newTeacher.fullName,
+            email: newTeacher.email,
+            password: newTeacher.password,
         })
     } catch (error) {
         res.status(500).json({ message: "Error registering teacher", error });
@@ -101,17 +102,17 @@ export const registerTeacher = async (req, res) => {
 
 // Function to login a teacher
 export const loginTeacher = async(req, res) => {
-    const {email, password} = req.body;
+    const {fullName, password} = req.body;
     try {
         if(
-            !email ||
+            !fullName ||
             !password
         ){
             return res.status(400).send({message: "Please complete all fields"});
         }
 
-        const teacher = await Teacher.findOne({email});
-        if(!email){
+        const teacher = await Teacher.findOne({fullName});
+        if(!teacher){
             return res.status(400).send({message: "User not exists"})
         }
         const isPasswordCorrect = await bcrypt.compare(password, teacher.password);
@@ -121,8 +122,8 @@ export const loginTeacher = async(req, res) => {
 
         res.status(200).json({message: "Login successfully",
             _id: teacher._id,
-            username: teacher.username,
-            password: teacher.password
+            fullName: teacher.fullName,
+            email: teacher.email
         });
     } catch (error) {
         console.error("Error in teacherController login", error)
